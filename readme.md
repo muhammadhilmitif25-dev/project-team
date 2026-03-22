@@ -34,7 +34,6 @@ Sebelum Project dimulai alangkah baiknya untuk mengunduh Tools tools berikut:
 | MSYS2 / MinGW64    | Environment dan compiler untuk menjalankan program | https://www.msys2.org/         |
 | Visual Studio Code | Code editor untuk menulis dan mengedit program     | https://code.visualstudio.com/ |
 
-
 ## ▶️ Cek Instalasi (via CMD)
 
 Buka Command Prompt (CMD), lalu jalankan perintah berikut:
@@ -44,19 +43,21 @@ git --version
 where gcc
 code --version
 
+```
 
 ### 📥 Clone Repository 
 
 Ikuti langkah berikut untuk mengambil project dari GitHub:
 
 1. Buka CMD / Terminal
+
 2. Jalankan perintah berikut:
 ```bash
 git clone https://github.com/username/nama-repo.git
-
+``` 
 3. Masuk ke folder project:
 cd nama-repo
 
-4. Buka di Visual Studio Code:
-code .
+4. Buka di Visual Studio Code: 
+```code .```
 
