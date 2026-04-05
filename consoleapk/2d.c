@@ -1,6 +1,5 @@
 #include <stdio.h>
+#include "boolean.h"
 
-int main (){
-//sementara dulu gini
 
-}
+
