@@ -1,4 +1,5 @@
 #include "kursor.h"
+#include "array2d.h"
 #include <stdbool.h>
 
 // Variabel pendukung
@@ -11,6 +12,12 @@ void JalankanFitur(HWND hwnd) {
             isDirty = false;
         }
     }
+    // 1. Bersihkan tampilan di layar
     SetWindowText(hEdit, ""); 
+
+    // 2. Bersihkan data di memori (Array 2D)
+    initBuffer();
+
+    // 3. Reset status perubahan
     isDirty = false;
 }
