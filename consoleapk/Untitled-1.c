@@ -1,22 +1,11 @@
 #include <windows.h>
 #include <stdbool.h>
+#include "kursor.h"
 
 #define ID_NEW 1
-bool isDirty = false; 
 HWND hEdit;
+extern bool isDirty;
 
-// LOGIKA INTI 2 FITUR
-void JalankanFitur(HWND hwnd) {
-    // 1. Correct Navigation
-    if (isDirty) {
-        if (MessageBox(hwnd, "Simpan perubahan?", "Konfirmasi", MB_YESNO) == IDYES) {
-            isDirty = false;
-        }
-    }
-    // 2. Arbitrary Insertion (Reset untuk file baru)
-    SetWindowText(hEdit, ""); 
-    isDirty = false;
-}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     switch (msg) {
