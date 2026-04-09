@@ -3,8 +3,8 @@
 
 #include "cursor.h" // 🔥 Harus include ini
 
-#define MAX_BARIS 10
-#define MAX_KOLOM 10
+#define MAX_BARIS 100
+#define MAX_KOLOM 100
 
 typedef struct {
     char text[MAX_BARIS][MAX_KOLOM];
