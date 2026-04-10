@@ -2,7 +2,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include "editor.h"
+#include "cursor.h"
 #include "fileio.h"
+#include "buffer.h"
 #include "searchfile.h"
 
 // Inisialisasi variabel global di sini (Hanya sekali)

@@ -28,7 +28,6 @@ int countTotalChars(Buffer *b) {
 
 /* --- MANIPULASI TEKS --- */
 void insertChar(Buffer *b, char c) {
-    // 🔥 SATPAM 100 KARAKTER (Lockdown Total)
     if (countTotalChars(b) >= (MAX_BARIS * MAX_KOLOM)) return;
 
     int row = b->cur.brs;
@@ -85,124 +84,230 @@ void deleteChar(Buffer *b) {
 
     if (row == 0 && col == 0) return;
 
-    // 1. Hitung Posisi Linear Kursor
-    int currentLinearPos = 0;
-    for (int i = 0; i < row; i++) {
-        int len = 0;
-        while (len < MAX_KOLOM && b->text[i][len] != '\0') len++;
-        currentLinearPos += len;
-    }
-    currentLinearPos += col;
-    int deleteLinearIndex = currentLinearPos - 1;
+    // --- SKENARIO 1: Hapus di tengah baris (col > 0) ---
+    // (BAGIAN INI SUDAH BENAR DARI SEBELUMNYA, PERTAHANKAN)
+    if (col > 0) {
+        int wasFull = (b->text[row][MAX_KOLOM - 1] != '\0');
+        
+        b->cur.klm--;
+        col--; 
 
-    // 2. Ambil semua teks, skip karakter yang dihapus (Ripple Effect)
-    char tempSisa[MAX_BARIS * MAX_KOLOM + 1];
-    int k = 0, charCounter = 0;
-    for (int i = 0; i < MAX_BARIS; i++) {
-        for (int j = 0; j < MAX_KOLOM && b->text[i][j] != '\0'; j++) {
-            if (charCounter != deleteLinearIndex) {
-                tempSisa[k++] = b->text[i][j];
+        for (int j = col; j < MAX_KOLOM - 1; j++) {
+            b->text[row][j] = b->text[row][j + 1];
+        }
+        b->text[row][MAX_KOLOM - 1] = '\0';
+
+        if (wasFull) {
+            int curr_r = row;
+            while (curr_r < MAX_BARIS - 1) {
+                if (b->text[curr_r + 1][0] != '\0') {
+                    b->text[curr_r][MAX_KOLOM - 1] = b->text[curr_r + 1][0];
+                    int nextWasFull = (b->text[curr_r + 1][MAX_KOLOM - 1] != '\0');
+                    
+                    for (int k = 0; k < MAX_KOLOM - 1; k++) {
+                        b->text[curr_r + 1][k] = b->text[curr_r + 1][k + 1];
+                    }
+                    b->text[curr_r + 1][MAX_KOLOM - 1] = '\0';
+
+                    if (b->text[curr_r + 1][0] == '\0') {
+                        for (int i = curr_r + 1; i < MAX_BARIS - 1; i++) {
+                            for (int j = 0; j < MAX_KOLOM; j++) {
+                                b->text[i][j] = b->text[i + 1][j];
+                            }
+                        }
+                        for (int j = 0; j < MAX_KOLOM; j++) b->text[MAX_BARIS - 1][j] = '\0';
+                        break;
+                    }
+                    if (!nextWasFull) break; 
+                    curr_r++;
+                } else {
+                    break;
+                }
             }
-            charCounter++;
         }
-        // Wipe Baris
-        for (int j = 0; j < MAX_KOLOM; j++) b->text[i][j] = '\0';
-    }
-    tempSisa[k] = '\0';
-
-    // 3. Tulis Ulang & Set Kursor Baru
-    b->cur.brs = 0; b->cur.klm = 0;
-    for (int i = 0; i < k; i++) {
-        insertChar(b, tempSisa[i]);
-    }
-
-    int runningPos = 0;
-    for (int i = 0; i < MAX_BARIS; i++) {
-        int len = 0;
-        while (len < MAX_KOLOM && b->text[i][len] != '\0') len++;
-        if (deleteLinearIndex <= runningPos + len) {
-            b->cur.brs = i;
-            b->cur.klm = deleteLinearIndex - runningPos;
-            break;
+    } 
+    // --- SKENARIO 2: Gabung Baris / Backspace di Kolom 0 ---
+    else if (row > 0) {
+        int prev = row - 1;
+        
+        // KUNCI: Cek apakah baris INI tadinya full?
+        // Kalau nggak full, dia HARAM narik baris di bawahnya!
+        int rowWasFull = (b->text[row][MAX_KOLOM - 1] != '\0');
+        
+        int lastPos = 0;
+        while (lastPos < MAX_KOLOM && b->text[prev][lastPos] != '\0') {
+            lastPos++;
         }
-        runningPos += len;
+
+        b->cur.brs = prev;
+        b->cur.klm = lastPos;
+
+        int k = 0;
+        while (k < MAX_KOLOM && b->text[row][k] != '\0' && lastPos + k < MAX_KOLOM) {
+            b->text[prev][lastPos + k] = b->text[row][k];
+            k++;
+        }
+
+        int charsMoved = k;
+
+        if (charsMoved > 0) {
+            for (int i = 0; i < MAX_KOLOM - charsMoved; i++) {
+                b->text[row][i] = b->text[row][i + charsMoved];
+            }
+            for (int i = MAX_KOLOM - charsMoved; i < MAX_KOLOM; i++) {
+                b->text[row][i] = '\0';
+            }
+        }
+
+        if (b->text[row][0] == '\0') {
+            for (int i = row; i < MAX_BARIS - 1; i++) {
+                for (int j = 0; j < MAX_KOLOM; j++) {
+                    b->text[i][j] = b->text[i + 1][j];
+                }
+            }
+            for (int j = 0; j < MAX_KOLOM; j++) b->text[MAX_BARIS - 1][j] = '\0';
+        } else {
+            // SOLUSI: Cuma narik baris bawah kalau rowWasFull == 1 (aslinya Auto-Wrap)
+            if (rowWasFull) {
+                int curr_r = row;
+                while (curr_r < MAX_BARIS - 1) {
+                    int len = 0;
+                    while (len < MAX_KOLOM && b->text[curr_r][len] != '\0') len++;
+                    int gaps = MAX_KOLOM - len;
+
+                    if (gaps > 0 && b->text[curr_r + 1][0] != '\0') {
+                        int moved = 0;
+                        while (moved < gaps && b->text[curr_r + 1][moved] != '\0') {
+                            b->text[curr_r][len + moved] = b->text[curr_r + 1][moved];
+                            moved++;
+                        }
+
+                        for (int i = 0; i < MAX_KOLOM - moved; i++) {
+                            b->text[curr_r + 1][i] = b->text[curr_r + 1][i + moved];
+                        }
+                        for (int i = MAX_KOLOM - moved; i < MAX_KOLOM; i++) {
+                            b->text[curr_r + 1][i] = '\0';
+                        }
+
+                        if (b->text[curr_r + 1][0] == '\0') {
+                            for (int i = curr_r + 1; i < MAX_BARIS - 1; i++) {
+                                for (int j = 0; j < MAX_KOLOM; j++) {
+                                    b->text[i][j] = b->text[i + 1][j];
+                                }
+                            }
+                            for (int j = 0; j < MAX_KOLOM; j++) b->text[MAX_BARIS - 1][j] = '\0';
+                            break;
+                        }
+                        curr_r++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
     }
     b->isSaved = 0;
 }
-
 void newLine(Buffer *b) {
     if (countTotalChars(b) >= (MAX_BARIS * MAX_KOLOM) || b->cur.brs >= MAX_BARIS - 1) return;
 
-    char tempSisa[MAX_BARIS * MAX_KOLOM + 1];
-    int k = 0;
-    for (int i = b->cur.brs; i < MAX_BARIS; i++) {
-        int startCol = (i == b->cur.brs) ? b->cur.klm : 0;
-        for (int j = startCol; j < MAX_KOLOM && b->text[i][j] != '\0'; j++) {
-            tempSisa[k++] = b->text[i][j];
+    int row = b->cur.brs;
+    int col = b->cur.klm;
+
+    // KUNCI: Cek apakah baris ini aslinya penuh? 
+    // Kalau penuh, berarti baris bawahnya adalah sambungan kata yang terputus.
+    int wasFull = (b->text[row][MAX_KOLOM - 1] != '\0');
+
+    // 1. Geser semua baris di bawah kursor TURUN 1 level secara UTUH.
+    for (int i = MAX_BARIS - 1; i > row + 1; i--) {
+        for (int j = 0; j < MAX_KOLOM; j++) {
+            b->text[i][j] = b->text[i - 1][j];
         }
-        for (int j = startCol; j < MAX_KOLOM; j++) b->text[i][j] = '\0';
     }
-    tempSisa[k] = '\0';
 
-    b->cur.brs++; b->cur.klm = 0;
-    int targetRow = b->cur.brs;
-    for (int i = 0; i < k; i++) insertChar(b, tempSisa[i]);
+    // 2. Kosongkan baris baru yang terbentuk
+    for (int j = 0; j < MAX_KOLOM; j++) {
+        b->text[row + 1][j] = '\0';
+    }
 
-    b->cur.brs = targetRow;
+    // 3. Pindahkan sisa karakter di KANAN kursor ke baris baru tersebut
+    int k = 0;
+    for (int j = col; j < MAX_KOLOM; j++) {
+        if (b->text[row][j] != '\0') {
+            b->text[row + 1][k++] = b->text[row][j];
+            b->text[row][j] = '\0'; // Hapus dari baris lama
+        }
+    }
+
+    // 4. Update Kursor ke awal baris baru
+    b->cur.brs++;
     b->cur.klm = 0;
     b->isSaved = 0;
-}
 
-/* --- NAVIGASI --- */
-void movekiri(Buffer *b) {
-    if (b->cur.klm > 0) {
-        b->cur.klm--;
-    } else if (b->cur.brs > 0) {
-        b->cur.brs--;
-        int len = 0;
-        while (len < MAX_KOLOM && b->text[b->cur.brs][len] != '\0') len++;
-        b->cur.klm = len;
-    }
-}
+    // 5. RIPPLE UP: Jika aslinya penuh, tarik sisa katanya (misal 'at') ke baris baru ('farah')
+    if (wasFull) {
+        int curr_r = row + 1; 
+        while (curr_r < MAX_BARIS - 1) {
+            int len = 0;
+            while (len < MAX_KOLOM && b->text[curr_r][len] != '\0') len++;
+            int gaps = MAX_KOLOM - len;
 
-void movekanan(Buffer *b) {
-    int len = 0;
-    while (len < MAX_KOLOM && b->text[b->cur.brs][len] != '\0') len++;
-    if (b->cur.klm < len) {
-        b->cur.klm++;
-    } else if (b->cur.brs < MAX_BARIS - 1 && b->text[b->cur.brs + 1][0] != '\0') {
-        b->cur.brs++;
-        b->cur.klm = 0;
-    }
-}
+            if (gaps > 0 && b->text[curr_r + 1][0] != '\0') {
+                int moved = 0;
+                while (moved < gaps && b->text[curr_r + 1][moved] != '\0') {
+                    b->text[curr_r][len + moved] = b->text[curr_r + 1][moved];
+                    moved++;
+                }
 
-void moveatas(Buffer *b) {
-    if (b->cur.brs > 0) {
-        b->cur.brs--;
-        int len = 0;
-        while (len < MAX_KOLOM && b->text[b->cur.brs][len] != '\0') len++;
-        if (b->cur.klm > len) b->cur.klm = len;
-    }
-}
+                for (int i = 0; i < MAX_KOLOM - moved; i++) {
+                    b->text[curr_r + 1][i] = b->text[curr_r + 1][i + moved];
+                }
+                for (int i = MAX_KOLOM - moved; i < MAX_KOLOM; i++) {
+                    b->text[curr_r + 1][i] = '\0';
+                }
 
-void movebawah(Buffer *b) {
-    if (b->cur.brs < MAX_BARIS - 1 && b->text[b->cur.brs + 1][0] != '\0') {
-        b->cur.brs++;
-        int len = 0;
-        while (len < MAX_KOLOM && b->text[b->cur.brs][len] != '\0') len++;
-        if (b->cur.klm > len) b->cur.klm = len;
+                if (b->text[curr_r + 1][0] == '\0') {
+                    for (int i = curr_r + 1; i < MAX_BARIS - 1; i++) {
+                        for (int j = 0; j < MAX_KOLOM; j++) {
+                            b->text[i][j] = b->text[i + 1][j];
+                        }
+                    }
+                    for (int j = 0; j < MAX_KOLOM; j++) b->text[MAX_BARIS - 1][j] = '\0';
+                    break; 
+                }
+                curr_r++;
+            } else {
+                break;
+            }
+        }
     }
 }
 
 /* --- DISPLAY --- */
 void displayBuffer(Buffer *b) {
     for (int i = 0; i < MAX_BARIS; i++) {
-        if (b->text[i][0] == '\0' && i != b->cur.brs) continue;
-        for (int j = 0; j <= MAX_KOLOM; j++) {
+        // Cek apakah baris ini ada isinya?
+        int adaIsi = 0;
+        for (int k = 0; k < MAX_KOLOM; k++) {
+            if (b->text[i][k] != '\0' && b->text[i][k] != ' ') {
+                adaIsi = 1;
+                break;
+            }
+        }
+        
+        // Skip baris kosong biar nggak menuai layar (kecuali baris kursor)
+        if (!adaIsi && i != b->cur.brs) continue;
+
+        for (int j = 0; j < MAX_KOLOM; j++) {
+            // Tampilkan Kursor
             if (i == b->cur.brs && j == b->cur.klm) printf("|");
-            if (j < MAX_KOLOM) {
-                if (b->text[i][j] == '\0') break;
+
+            // Tampilkan Karakter
+            if (b->text[i][j] != '\0') {
                 printf("%c", b->text[i][j]);
+            } else {
+                // Kalo null, print spasi HANYA kalo posisinya di kiri kursor
+                if (i == b->cur.brs && j < b->cur.klm) printf(" ");
             }
         }
         printf("\n");
