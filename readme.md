@@ -5,7 +5,7 @@
 
 | NIM       | Nama                             | GitHub                       |
 | --------- | -------------------------------- |------------------------------|
-| 251511046 | Maheswara Farrel Surendra Tsaqif | -                            |
+| 251511046 | Maheswara Farrel Surendra Tsaqif | farrel-de                            |
 | 251511049 | Muhammad Hilmi Farahat           | @muhammadhilmitif25-dev      |
 
 ---

@@ -1,5 +1,4 @@
 #include "array2d.h"
-
 #include <stdio.h>
 
 char text[MAX_BARIS][MAX_KOLOM];
@@ -31,4 +30,27 @@ void deleteChar(int baris, int kolom)
     }
 
    text[baris][MAX_KOLOM - 1] = '\0';
+}
+
+void displayBuffer()
+{
+    for (int i = 0; i < MAX_BARIS; i++)
+    {
+        if (text[i][0] == '\0')
+        {
+            break;
+        }
+
+        for (int j = 0; j < MAX_KOLOM; j++)
+        {
+            if (text[i][j] == '\0')
+            {
+                break;
+            }
+
+            printf("%c", text[i][j]);
+        }
+
+        printf("\n");
+    }
 }

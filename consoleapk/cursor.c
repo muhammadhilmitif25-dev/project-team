@@ -1,23 +1,12 @@
-#include "kursor.h"
-#include "array2d.h"
-#include <stdbool.h>
+#include "cursor.h"
 
-// Variabel pendukung
-bool isDirty = false;
-extern HWND hEdit;
+void initCursor(Cursor *c) {
+    c->brs = 0;
+    c->klm = 0;
+}
 
-void JalankanFitur(HWND hwnd) {
-    if (isDirty) {
-        if (MessageBox(hwnd, "Simpan perubahan?", "Konfirmasi", MB_YESNO) == IDYES) {
-            isDirty = false;
-        }
-    }
-    // 1. Bersihkan tampilan di layar
-    SetWindowText(hEdit, ""); 
-
-    // 2. Bersihkan data di memori (Array 2D)
-    initBuffer();
-
-    // 3. Reset status perubahan
-    isDirty = false;
+// Fungsi pembantu agar kursor tidak keluar batas MAX
+void setCursorPos(Cursor *c, int newBrs, int newKlm) {
+    if (newBrs >= 0 && newBrs < 10) c->brs = newBrs;
+    if (newKlm >= 0 && newKlm <= 10) c->klm = newKlm;
 }

@@ -9,4 +9,5 @@ extern char text[MAX_BARIS][MAX_KOLOM];
 void initBuffer();
 void insertChar(int baris, int kolom, char c);
 void deleteChar(int baris, int kolom);
+void displayBuffer();
 #endif

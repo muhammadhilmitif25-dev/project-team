@@ -1,6 +1,12 @@
-#ifndef BF582410_A123_44B6_94D9_FF7563BAD212
-#define BF582410_A123_44B6_94D9_FF7563BAD212
+#ifndef CURSOR_H
+#define CURSOR_H
 
-void JalankanFitur(HWND hwnd);
+typedef struct {
+    int brs; // Baris kursor
+    int klm; // Kolom kursor
+} Cursor;
 
-#endif /* BF582410_A123_44B6_94D9_FF7563BAD212 */
+// Inisialisasi kursor ke (0,0)
+void initCursor(Cursor *c);
+
+#endif
