@@ -1,121 +1,43 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
-#include "buffer.h"
-#include "boolean.h"
+#include <stdbool.h>
+#include <string.h>
+#include "editor.h"
+#include "fileio.h"
+#include "searchfile.h"
 
-// Deklarasi Fungsi Menu
-int showMainMenu();
-int openFileMenu();
-void createNewFile();
-void searchFile();
-void exitProgram();
+// Inisialisasi variabel global di sini (Hanya sekali)
+bool isDirty = false;
+char buffer[1000] = ""; 
+char namaFileDefault[100] = "catatan.txt"; 
 
 int main() {
-    int pilihan;
-    do {
-        pilihan = showMainMenu();
-        switch (pilihan) {
-            case 1:
-                openFileMenu();
-                break;
-            case 2:
-                exitProgram();
-                break;
-            default:
-                printf("Pilihan tidak valid!\n");
-        }
-    } while (pilihan != 2);
-    return 0;
-}
-
-// --- FUNGSI EDITOR (Pindahan dari main lama lu) ---
-void createNewFile() {
-    Buffer b;
-    initBuffer(&b);
-    system("cls");
-    
-    printf("--- NEW FILE (Mode Editor) ---\n");
-    printf("ESC: Keluar | Arrows: Navigasi | Backspace: Hapus\n\n");
-    displayBuffer(&b);
-
+    int menu;
     while (1) {
-        int c = getch();
+        printf("\n=== NOTEPAD CONSOLE CKA (PRO) ===\n");
+        printf("Isi Notepad: [%s]\n", buffer);
+        printf("Status: %s\n", isDirty ? "DIRTY (Butuh Save)" : "CLEAN (Aman)");
+        printf("---------------------------------\n");
+        printf("1. Ketik Teks (Arbitrary Insertion)\n");
+        printf("2. Save File (Simpan)\n");
+        printf("3. Save As (Nama Baru)\n");
+        printf("4. Open File (Buka)\n");
+        printf("5. Search (Cari Kata)\n");
+        printf("6. Lembar Baru (Correct Navigation)\n");
+        printf("7. Keluar\n");
+        printf("Pilih menu: ");
+        scanf("%d", &menu);
 
-        // 1. ESC - Keluar
-        if (c == 27) {
-            if (b.isSaved == 0) {
-                printf("\nBelum disave! Keluar? (y/n): ");
-                char pilih = getch();
-                if (pilih == 'y' || pilih == 'Y') break;
-            } else {
-                break;
-            }
-        }
-        // 2. ARROW KEYS
-        else if (c == 224) {
-            int arrow = getch();
-            if (arrow == 75) movekiri(&b);
-            else if (arrow == 77) movekanan(&b);
-            else if (arrow == 72) moveatas(&b);
-            else if (arrow == 80) movebawah(&b);
-        }
-        // 3. BACKSPACE
-        else if (c == 8) {
-            deleteChar(&b);
-        }
-        // 4. ENTER
-        else if (c == 13) {
-            newLine(&b);
-        }
-        // 5. KARAKTER BIASA
-        else if (c >= 32 && c <= 126) {
-            insertChar(&b, (char)c);
-        }
-
-        // REFRESH DISPLAY
-        system("cls");
-        printf("--- EDITOR MODE (10x10) ---\n");
-        displayBuffer(&b);
+        if (menu == 1) {
+            printf("Masukkan teks: ");
+            scanf(" %[^\n]s", buffer);
+            isDirty = true;
+        } 
+        else if (menu == 2) SimpanKeFile();
+        else if (menu == 3) SaveAs();
+        else if (menu == 4) BukaDariFile();
+        else if (menu == 5) CariKata();
+        else if (menu == 6) JalankanFiturNew();
+        else if (menu == 7) break;
     }
-}
-
-// --- SISA FUNGSI MENU ---
-int showMainMenu() {
-    int pilih;
-    printf("\n=== MAIN MENU ===\n");
-    printf("1. Open File\n");
-    printf("2. Exit\n");
-    printf("Pilih: ");
-    scanf("%d", &pilih);
-    return pilih;
-}
-
-int openFileMenu() {
-    int pilih;
-    do {
-        printf("\n=== OPEN FILE ===\n");
-        printf("1. New File\n");
-        printf("2. Search File\n");
-        printf("3. Back\n");
-        printf("Pilih: ");
-        scanf("%d", &pilih);
-
-        switch (pilih) {
-            case 1:
-                createNewFile(); // Panggil fungsi editor di sini
-                break;
-            case 2:
-                searchFile();
-                break;
-            case 3:
-                break;
-            default:
-                printf("Pilihan tidak valid!\n");
-        }
-    } while (pilih != 3);
     return 0;
 }
-
-void searchFile() { printf("\n[Mencari file...]\n"); }
-void exitProgram() { printf("\n[Keluar dari program]\n"); }
