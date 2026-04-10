@@ -21,7 +21,17 @@ void SimpanKeFile() {
     printf(">> Berhasil disimpan ke %s\n", namaFileDefault);
 }
 
-// 2. Fungsi Open (Membuka teks dari file)
+// 2. Fungsi Save As (Menentukan nama)
+void SaveAs() {
+    printf("--- FITUR SAVE AS ---\n");
+    printf("Masukkan nama file baru (akhiri dengan .txt): ");
+    scanf("%s", namaFileDefault); // Di sini user input nama file baru
+    
+    // Setelah namanya diganti, kita panggil fungsi simpan yang sudah ada
+    SimpanKeFile(); 
+}
+
+// 3. Fungsi Open (Membuka teks dari file)
 void BukaDariFile() {
     FILE *fptr = fopen(namaFileDefault, "r"); // "r" = read/baca
     if (fptr == NULL) {
@@ -34,7 +44,7 @@ void BukaDariFile() {
     printf(">> File %s berhasil dimuat ke layar.\n", namaFileDefault);
 }
 
-// 3. Fungsi Search (Mencari kata)
+// 4. Fungsi Search (Mencari kata)
 void CariKata() {
     char kata[50];
     printf("Masukkan kata yang dicari: ");
@@ -73,10 +83,11 @@ int main() {
         printf("---------------------------------\n");
         printf("1. Ketik Teks (Arbitrary Insertion)\n");
         printf("2. Save File (Simpan)\n");
-        printf("3. Open File (Buka)\n");
-        printf("4. Search (Cari Kata)\n");
-        printf("5. Lembar Baru (Correct Navigation)\n");
-        printf("6. Keluar\n");
+        printf("3. Save As (Nama Baru)\n");
+        printf("4. Open File (Buka)\n");
+        printf("5. Search (Cari Kata)\n");
+        printf("6. Lembar Baru (Correct Navigation)\n");
+        printf("7. Keluar\n");
         printf("Pilih menu: ");
         scanf("%d", &menu);
 
@@ -89,15 +100,18 @@ int main() {
             SimpanKeFile();
         } 
         else if (menu == 3) {
-            BukaDariFile();
+            SaveAs();
         }
         else if (menu == 4) {
-            CariKata();
+            BukaDariFile();
         }
         else if (menu == 5) {
+            CariKata();
+        }
+        else if (menu == 6) {
             JalankanFiturNew();
         } 
-        else if (menu == 6) {
+        else if (menu == 7) {
             break;
         }
     }
